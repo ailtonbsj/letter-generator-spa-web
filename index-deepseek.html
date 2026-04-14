@@ -1,0 +1,1084 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>Gerador de Carta de Oposição</title>
+  <!-- Google Fonts & Material Symbols -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Roboto+Mono&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0,1" />
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg-color: #f5f7fa;
+      --surface-color: #ffffff;
+      --primary-color: #1e3a5f;
+      --primary-light: #2b4c6e;
+      --accent-color: #1976d2;
+      --text-primary: #1e293b;
+      --text-secondary: #475569;
+      --border-color: #e2e8f0;
+      --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+      --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1);
+      --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1);
+      --sidebar-width: 280px;
+      --toolbar-height: 64px;
+      --transition: all 0.2s ease;
+    }
+
+    body.dark {
+      --bg-color: #0f172a;
+      --surface-color: #1e293b;
+      --primary-color: #334155;
+      --primary-light: #475569;
+      --accent-color: #3b82f6;
+      --text-primary: #f1f5f9;
+      --text-secondary: #cbd5e1;
+      --border-color: #334155;
+    }
+
+    body {
+      font-family: 'Roboto', sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-primary);
+      line-height: 1.5;
+      transition: var(--transition);
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* Sidebar (Drawer) */
+    .sidenav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: var(--sidebar-width);
+      height: 100%;
+      background-color: var(--surface-color);
+      box-shadow: var(--shadow-lg);
+      transform: translateX(-100%);
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      z-index: 1200;
+      display: flex;
+      flex-direction: column;
+      border-right: 1px solid var(--border-color);
+    }
+
+    .sidenav.open {
+      transform: translateX(0);
+    }
+
+    .sidenav-header {
+      padding: 20px 16px;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .sidenav-header h3 {
+      font-weight: 500;
+      font-size: 1.2rem;
+      color: var(--text-primary);
+    }
+
+    .sidenav nav {
+      flex: 1;
+      padding: 16px 8px;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 12px 16px;
+      margin: 4px 0;
+      border-radius: 28px;
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-weight: 500;
+      transition: var(--transition);
+      cursor: pointer;
+      border: none;
+      background: transparent;
+      width: 100%;
+      text-align: left;
+      font-size: 1rem;
+    }
+
+    .nav-item:hover {
+      background-color: rgba(0,0,0,0.04);
+    }
+    body.dark .nav-item:hover {
+      background-color: rgba(255,255,255,0.08);
+    }
+
+    .nav-item.active {
+      background-color: var(--primary-color);
+      color: white;
+    }
+
+    .nav-item .material-symbols-outlined {
+      font-size: 24px;
+    }
+
+    /* Overlay for mobile */
+    .sidenav-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.5);
+      z-index: 1100;
+      opacity: 0;
+      visibility: hidden;
+      transition: var(--transition);
+    }
+    .sidenav-overlay.visible {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    /* Main content area */
+    .main-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      width: 100%;
+      transition: var(--transition);
+    }
+
+    /* Toolbar */
+    .toolbar {
+      height: var(--toolbar-height);
+      background-color: var(--surface-color);
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      padding: 0 16px;
+      box-shadow: var(--shadow-sm);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+
+    .menu-btn, .theme-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--text-primary);
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: var(--transition);
+    }
+    .menu-btn:hover, .theme-btn:hover {
+      background-color: rgba(0,0,0,0.05);
+    }
+    body.dark .menu-btn:hover,
+    body.dark .theme-btn:hover {
+      background-color: rgba(255,255,255,0.1);
+    }
+
+    .toolbar-title {
+      flex: 1;
+      font-size: 1.4rem;
+      font-weight: 500;
+      margin-left: 8px;
+      color: var(--primary-color);
+    }
+    body.dark .toolbar-title {
+      color: var(--accent-color);
+    }
+
+    /* Page container */
+    .page-container {
+      flex: 1;
+      padding: 24px;
+      overflow-y: auto;
+    }
+
+    /* Views */
+    .view {
+      display: none;
+      max-width: 1200px;
+      margin: 0 auto;
+      width: 100%;
+    }
+    .view.active {
+      display: block;
+    }
+
+    /* Jumbotron */
+    .jumbotron {
+      background: linear-gradient(145deg, var(--primary-light), var(--primary-color));
+      color: white;
+      border-radius: 24px;
+      padding: 48px 40px;
+      margin-bottom: 32px;
+      box-shadow: var(--shadow-md);
+    }
+    .jumbotron h1 {
+      font-size: 3rem;
+      font-weight: 300;
+      margin-bottom: 16px;
+    }
+    .jumbotron p {
+      font-size: 1.25rem;
+      opacity: 0.9;
+      max-width: 700px;
+    }
+
+    /* Form card */
+    .form-card {
+      background: var(--surface-color);
+      border-radius: 24px;
+      padding: 32px;
+      box-shadow: var(--shadow-md);
+      border: 1px solid var(--border-color);
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 24px;
+    }
+
+    .form-field {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .form-field label {
+      font-weight: 500;
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+    }
+    .form-field input {
+      padding: 12px 16px;
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      font-size: 1rem;
+      background: var(--bg-color);
+      color: var(--text-primary);
+      transition: var(--transition);
+      font-family: 'Roboto', sans-serif;
+    }
+    .form-field input:focus {
+      outline: 2px solid var(--accent-color);
+      border-color: transparent;
+    }
+
+    .required-indicator {
+      color: #ef4444;
+      margin-left: 4px;
+    }
+
+    .action-bar {
+      margin-top: 32px;
+      display: flex;
+      justify-content: flex-end;
+    }
+    .btn {
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      padding: 14px 32px;
+      border-radius: 40px;
+      font-size: 1rem;
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+      box-shadow: var(--shadow-sm);
+      transition: var(--transition);
+      border: 1px solid transparent;
+    }
+    .btn:hover {
+      background-color: var(--primary-light);
+      box-shadow: var(--shadow-md);
+    }
+    .btn .material-symbols-outlined {
+      font-size: 20px;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .toolbar-title {
+        font-size: 1.2rem;
+      }
+      .jumbotron {
+        padding: 32px 24px;
+      }
+      .jumbotron h1 {
+        font-size: 2.2rem;
+      }
+      .form-card {
+        padding: 20px;
+      }
+    }
+
+    @media (min-width: 1024px) {
+      .sidenav {
+        transform: translateX(0);
+        position: relative;
+        box-shadow: none;
+        border-right: 1px solid var(--border-color);
+      }
+      .main-content {
+        margin-left: 0;
+      }
+      .menu-btn {
+        display: none;
+      }
+      .sidenav-overlay {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Sidebar overlay (mobile) -->
+  <div class="sidenav-overlay" id="sidenavOverlay"></div>
+
+  <!-- Side Navigation -->
+  <aside class="sidenav" id="sidenav">
+    <div class="sidenav-header">
+      <h3>Menu</h3>
+      <button class="menu-btn" id="closeSidenavBtn" style="display: none;" aria-label="Fechar menu">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+    <nav>
+      <button class="nav-item" data-page="home">
+        <span class="material-symbols-outlined">home</span>
+        Início
+      </button>
+      <button class="nav-item" data-page="form">
+        <span class="material-symbols-outlined">description</span>
+        Gerador de Carta
+      </button>
+    </nav>
+  </aside>
+
+  <!-- Main Content -->
+  <div class="main-content">
+    <!-- Toolbar -->
+    <header class="toolbar">
+      <button class="menu-btn" id="menuToggleBtn" aria-label="Abrir menu">
+        <span class="material-symbols-outlined">menu</span>
+      </button>
+      <div class="toolbar-title">Gerador de Carta de Oposição DeepSeek</div>
+      <button class="theme-btn" id="themeToggleBtn" aria-label="Alternar tema">
+        <span class="material-symbols-outlined" id="themeIcon">dark_mode</span>
+      </button>
+    </header>
+
+    <!-- Page container -->
+    <div class="page-container">
+      <!-- Home View -->
+      <div id="homeView" class="view active">
+        <div class="jumbotron">
+          <h1>Bem-vindo(a)!</h1>
+          <p>Gere sua carta de oposição à contribuição assistencial/sindical de forma simples e rápida, preenchendo o formulário com seus dados.</p>
+        </div>
+        <div style="background: var(--surface-color); border-radius: 24px; padding: 24px; border: 1px solid var(--border-color);">
+          <h2 style="font-weight: 400; margin-bottom: 16px;">Como utilizar</h2>
+          <ul style="margin-left: 24px; color: var(--text-secondary);">
+            <li style="margin-bottom: 8px;">Acesse a página <strong>"Gerador de Carta"</strong> pelo menu lateral.</li>
+            <li style="margin-bottom: 8px;">Preencha todos os campos obrigatórios.</li>
+            <li style="margin-bottom: 8px;">Clique em "Gerar PDF" para baixar o documento personalizado.</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Form Generator View -->
+      <div id="formView" class="view">
+        <div class="form-card">
+          <h2 style="font-weight: 400; margin-bottom: 24px; color: var(--text-primary);">Preencha os dados da carta</h2>
+          <form id="letterForm">
+            <div class="form-grid">
+              <div class="form-field">
+                <label>Sindicato <span class="required-indicator">*</span></label>
+                <input type="text" id="sindicato" name="sindicato" value="SINDPD-CE" required>
+              </div>
+              <div class="form-field">
+                <label>Nome Completo <span class="required-indicator">*</span></label>
+                <input type="text" id="nomeCompleto" name="nomeCompleto" required>
+              </div>
+              <div class="form-field">
+                <label>Carteira Profissional <span class="required-indicator">*</span></label>
+                <input type="text" id="carteiraProfissional" name="carteiraProfissional" required>
+              </div>
+              <div class="form-field">
+                <label>Nome da Empresa <span class="required-indicator">*</span></label>
+                <input type="text" id="nomeEmpresa" name="nomeEmpresa" required>
+              </div>
+              <div class="form-field">
+                <label>CNPJ <span class="required-indicator">*</span></label>
+                <input type="text" id="cnpj" name="cnpj" required>
+              </div>
+              <div class="form-field">
+                <label>Endereço <span class="required-indicator">*</span></label>
+                <input type="text" id="endereco" name="endereco" required>
+              </div>
+              <div class="form-field">
+                <label>Bairro <span class="required-indicator">*</span></label>
+                <input type="text" id="bairro" name="bairro" required>
+              </div>
+              <div class="form-field">
+                <label>Cidade <span class="required-indicator">*</span></label>
+                <input type="text" id="cidade" name="cidade" required>
+              </div>
+              <div class="form-field">
+                <label>Estado <span class="required-indicator">*</span></label>
+                <input type="text" id="estado" name="estado" required>
+              </div>
+              <div class="form-field">
+                <label>Cidade de envio <span class="required-indicator">*</span></label>
+                <input type="text" id="cidadeEnvio" name="cidadeEnvio" required>
+              </div>
+              <div class="form-field">
+                <label>Data de envio <span class="required-indicator">*</span></label>
+                <input type="date" id="dataEnvio" name="dataEnvio" required>
+              </div>
+            </div>
+            <div class="action-bar">
+              <button type="button" id="generatePdfBtn" class="btn">
+                <span class="material-symbols-outlined">picture_as_pdf</span>
+                Gerar PDF
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function(){
+      "use strict";
+
+      // ---------- XML TEMPLATE (substitua se necessário) ----------
+      const templateXml = `<?xml version="1.0" encoding="UTF-8"?>
+
+<office:document xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0" xmlns:ooo="http://openoffice.org/2004/office" xmlns:fo="urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:config="urn:oasis:names:tc:opendocument:xmlns:config:1.0" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:meta="urn:oasis:names:tc:opendocument:xmlns:meta:1.0" xmlns:style="urn:oasis:names:tc:opendocument:xmlns:style:1.0" xmlns:text="urn:oasis:names:tc:opendocument:xmlns:text:1.0" xmlns:rpt="http://openoffice.org/2005/report" xmlns:draw="urn:oasis:names:tc:opendocument:xmlns:drawing:1.0" xmlns:dr3d="urn:oasis:names:tc:opendocument:xmlns:dr3d:1.0" xmlns:svg="urn:oasis:names:tc:opendocument:xmlns:svg-compatible:1.0" xmlns:chart="urn:oasis:names:tc:opendocument:xmlns:chart:1.0" xmlns:table="urn:oasis:names:tc:opendocument:xmlns:table:1.0" xmlns:number="urn:oasis:names:tc:opendocument:xmlns:datastyle:1.0" xmlns:ooow="http://openoffice.org/2004/writer" xmlns:oooc="http://openoffice.org/2004/calc" xmlns:of="urn:oasis:names:tc:opendocument:xmlns:of:1.2" xmlns:xforms="http://www.w3.org/2002/xforms" xmlns:tableooo="http://openoffice.org/2009/table" xmlns:calcext="urn:org:documentfoundation:names:experimental:calc:xmlns:calcext:1.0" xmlns:drawooo="http://openoffice.org/2010/draw" xmlns:loext="urn:org:documentfoundation:names:experimental:office:xmlns:loext:1.0" xmlns:field="urn:openoffice:names:experimental:ooo-ms-interop:xmlns:field:1.0" xmlns:math="http://www.w3.org/1998/Math/MathML" xmlns:form="urn:oasis:names:tc:opendocument:xmlns:form:1.0" xmlns:script="urn:oasis:names:tc:opendocument:xmlns:script:1.0" xmlns:formx="urn:openoffice:names:experimental:ooxml-odf-interop:xmlns:form:1.0" xmlns:dom="http://www.w3.org/2001/xml-events" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:grddl="http://www.w3.org/2003/g/data-view#" xmlns:css3t="http://www.w3.org/TR/css3-text/" xmlns:officeooo="http://openoffice.org/2009/office" office:version="1.4" office:mimetype="application/vnd.oasis.opendocument.text">
+ <office:meta><meta:creation-date>2026-04-09T21:32:27.179370800</meta:creation-date><dc:date>2026-04-13T20:23:09.934177200</dc:date><meta:editing-duration>PT32M56S</meta:editing-duration><meta:editing-cycles>12</meta:editing-cycles><meta:generator>LibreOffice/25.8.5.2$Windows_X86_64 LibreOffice_project/9c8b85f387cc00a89945a79c9e6239f32e450ac2</meta:generator><meta:print-date>2026-04-09T22:30:31.838809200</meta:print-date><meta:printed-by>Arquivos PDF</meta:printed-by><meta:document-statistic meta:table-count="0" meta:image-count="0" meta:object-count="0" meta:page-count="1" meta:paragraph-count="6" meta:word-count="61" meta:character-count="531" meta:non-whitespace-character-count="476"/></office:meta>
+ <office:settings>
+  <config:config-item-set config:name="ooo:view-settings">
+   <config:config-item config:name="ViewAreaTop" config:type="long">0</config:config-item>
+   <config:config-item config:name="ViewAreaLeft" config:type="long">0</config:config-item>
+   <config:config-item config:name="ViewAreaWidth" config:type="long">40880</config:config-item>
+   <config:config-item config:name="ViewAreaHeight" config:type="long">18942</config:config-item>
+   <config:config-item config:name="ShowRedlineChanges" config:type="boolean">true</config:config-item>
+   <config:config-item config:name="InBrowseMode" config:type="boolean">false</config:config-item>
+   <config:config-item-map-indexed config:name="Views">
+    <config:config-item-map-entry>
+     <config:config-item config:name="ViewId" config:type="string">view2</config:config-item>
+     <config:config-item config:name="ViewLeft" config:type="long">24204</config:config-item>
+     <config:config-item config:name="ViewTop" config:type="long">9885</config:config-item>
+     <config:config-item config:name="VisibleLeft" config:type="long">0</config:config-item>
+     <config:config-item config:name="VisibleTop" config:type="long">0</config:config-item>
+     <config:config-item config:name="VisibleRight" config:type="long">40878</config:config-item>
+     <config:config-item config:name="VisibleBottom" config:type="long">18941</config:config-item>
+     <config:config-item config:name="ZoomType" config:type="short">0</config:config-item>
+     <config:config-item config:name="ViewLayoutColumns" config:type="short">1</config:config-item>
+     <config:config-item config:name="ViewLayoutBookMode" config:type="boolean">false</config:config-item>
+     <config:config-item config:name="ZoomFactor" config:type="short">120</config:config-item>
+     <config:config-item config:name="IsSelectedFrame" config:type="boolean">false</config:config-item>
+     <config:config-item config:name="KeepRatio" config:type="boolean">false</config:config-item>
+     <config:config-item config:name="AnchoredTextOverflowLegacy" config:type="boolean">false</config:config-item>
+     <config:config-item config:name="LegacySingleLineFontwork" config:type="boolean">false</config:config-item>
+     <config:config-item config:name="ConnectorUseSnapRect" config:type="boolean">false</config:config-item>
+     <config:config-item config:name="IgnoreBreakAfterMultilineField" config:type="boolean">false</config:config-item>
+     <config:config-item config:name="UseTrailingEmptyLinesInLayout" config:type="boolean">false</config:config-item>
+    </config:config-item-map-entry>
+   </config:config-item-map-indexed>
+  </config:config-item-set>
+  <config:config-item-set config:name="ooo:configuration-settings">
+   <config:config-item config:name="ProtectForm" config:type="boolean">false</config:config-item>
+   <config:config-item config:name="PrinterName" config:type="string"/>
+   <config:config-item config:name="EmbeddedDatabaseName" config:type="string"/>
+   <config:config-item config:name="CurrentDatabaseDataSource" config:type="string"/>
+   <config:config-item config:name="LinkUpdateMode" config:type="short">1</config:config-item>
+   <config:config-item config:name="AddParaTableSpacingAtStart" config:type="boolean">true</config:config-item>
+   <config:config-item config:name="UnbreakableNumberings" config:type="boolean">false</config:config-item>
+   <config:config-item config:name="FieldAutoUpdate" config:type="boolean">true</config:config-item>
+   <config:config-item config:name="AddVerticalFrameOffsets" config:type="boolean">false</config:config-item>
+   <config:config-item config:name="AddParaTableSpacing" config:type="boolean">true</config:config-item>
+   <config:config-item config:name="ChartAutoUpdate" config:type="boolean">true</config:config-item>
+   <config:config-item config:name="CurrentDatabaseCommand" config:type="string"/>
+   <config:config-item config:name="PrinterSetup" config:type="base64Binary"/>
+   <config:config-item config:name="AlignTabStopPosition" config:type="boolean">true</config:config-item>
+   <config:config-item config:name="PrinterPaperFromSetup" config:type="boolean">false</config:config-item>
+   <config:config-item config:name="IsKernAsianPunctuation" config:type="boolean">false</config:config-item>
+   <config:config-item config:name="CharacterCompressionType" config:type="short">0</config:config-item>
+   <config:config-item config:name="ApplyUserData" config:type="boolean">true</config:config-item>
+   <config:config-item config:name="DoNotJustifyLinesWithManualBreak" config:type="boolean">false</config:config-item>
+   <config:config-item config:name="SaveThumbnail" config:type="boolean">true</config:config-item>
+   <config:config-item config:name="SaveGlobalDocumentLinks" config:type="boolean">false</config:config-item>
+   <config:config-item config:name="SmallCapsPercentage66" config:type="boolean">false</config:config-item>
+   <config:config-item config:name="CurrentDatabaseCommandType" config:type="int">0</config:config-item>
+   <config:config-item config:name="SaveVersionOnClose" config:type="boolean">false</config:config-item>
+   <config:config-item config:name="UpdateFromTemplate" config:type="boolean">true</config:config-item>
+   <config:config-item config:name="DoNotCaptureDrawObjsOnPage" config:type="boolean">false</config:config-item>
+   <config:config-item config:name="UseFormerObjectPositioning" config:type="boolean">false</config:config-item>
+   <config:config-item config:name="EmbedSystemFonts" config:type="boolean">false</config:config-item>
+   <config:config-item config:name="PrinterIndependentLayout" config:type="string">high-resolution</config:config-item>
+   <config:config-item config:name="IsLabelDocument" config:type="boolean">false</config:config-item>
+   <config:config-item config:name="AddFrameOffsets" config:type="boolean">false</config:config-item>
+   <config:config-item config:name="AddExternalLeading" config:type="boolean">true</config:config-item>
+   <config:config-item config:name="MsWordCompMinLineHeightByFly" config:type="boolean">false</config:config-item>
+   <config:config-item config:name="UseOldNumbering" config:type="boolean">false</config:config-item>
+   <config:config-item config:name="OutlineLevelYieldsNumbering" config:type="boolean">false</config:config-item>
+   <config:config-item config:name="DoNotResetParaAttrsForNumFont" config:type="boolean">false</config:config-item>
+   <config:config-item config:name="IgnoreFirstLineIndentInNumbering" config:type="boolean">false</config:config-item>
+   <config:config-item config:name="AllowPrintJobCancel" config:type="boolean">true</config:config-item>
+   <config:config-item config:name="UseFormerLineSpacing" config:type="boolean">false</config:config-item>
+   <config:config-item config:name="AddParaSpacingToTableCells" config:type="boolean">true</config:config-item>
+   <config:config-item config:name="AddParaLineSpacingToTableCells" config:type="boolean">true</config:config-item>
+   <config:config-item config:name="UseFormerTextWrapping" config:type="boolean">false</config:config-item>
+   <config:config-item config:name="RedlineProtectionKey" config:type="base64Binary"/>
+   <config:config-item config:name="ConsiderTextWrapOnObjPos" config:type="boolean">false</config:config-item>
+   <config:config-item config:name="NoGapAfterNoteNumber" config:type="boolean">false</config:config-item>
+   <config:config-item config:name="TableRowKeep" config:type="boolean">false</config:config-item>
+   <config:config-item config:name="TabsRelativeToIndent" config:type="boolean">true</config:config-item>
+   <config:config-item config:name="IgnoreTabsAndBlanksForLineCalculation" config:type="boolean">false</config:config-item>
+   <config:config-item config:name="IgnoreHiddenCharsForLineCalculation" config:type="boolean">true</config:config-item>
+   <config:config-item config:name="TabAtLeftIndentForParagraphsInList" config:type="boolean">false</config:config-item>
+   <config:config-item config:name="Rsid" config:type="int">2333569</config:config-item>
+   <config:config-item config:name="RsidRoot" config:type="int">1237735</config:config-item>
+   <config:config-item config:name="LoadReadonly" config:type="boolean">false</config:config-item>
+   <config:config-item config:name="ClipAsCharacterAnchoredWriterFlyFrames" config:type="boolean">false</config:config-item>
+   <config:config-item config:name="UnxForceZeroExtLeading" config:type="boolean">false</config:config-item>
+   <config:config-item config:name="UseOldPrinterMetrics" config:type="boolean">false</config:config-item>
+   <config:config-item config:name="MsWordCompTrailingBlanks" config:type="boolean">false</config:config-item>
+   <config:config-item config:name="MathBaselineAlignment" config:type="boolean">true</config:config-item>
+   <config:config-item config:name="InvertBorderSpacing" config:type="boolean">false</config:config-item>
+   <config:config-item config:name="CollapseEmptyCellPara" config:type="boolean">true</config:config-item>
+   <config:config-item config:name="TabOverflow" config:type="boolean">true</config:config-item>
+   <config:config-item config:name="StylesNoDefault" config:type="boolean">false</config:config-item>
+   <config:config-item config:name="ClippedPictures" config:type="boolean">false</config:config-item>
+   <config:config-item config:name="BackgroundParaOverDrawings" config:type="boolean">false</config:config-item>
+   <config:config-item config:name="EmbedFonts" config:type="boolean">false</config:config-item>
+   <config:config-item config:name="EmbedOnlyUsedFonts" config:type="boolean">false</config:config-item>
+   <config:config-item config:name="EmbedLatinScriptFonts" config:type="boolean">true</config:config-item>
+   <config:config-item config:name="EmbedAsianScriptFonts" config:type="boolean">true</config:config-item>
+   <config:config-item config:name="EmptyDbFieldHidesPara" config:type="boolean">true</config:config-item>
+   <config:config-item config:name="EmbedComplexScriptFonts" config:type="boolean">true</config:config-item>
+   <config:config-item config:name="TabOverMargin" config:type="boolean">false</config:config-item>
+   <config:config-item config:name="TabOverSpacing" config:type="boolean">false</config:config-item>
+   <config:config-item config:name="TreatSingleColumnBreakAsPageBreak" config:type="boolean">false</config:config-item>
+   <config:config-item config:name="MsWordUlTrailSpace" config:type="boolean">false</config:config-item>
+   <config:config-item config:name="SurroundTextWrapSmall" config:type="boolean">false</config:config-item>
+   <config:config-item config:name="ApplyParagraphMarkFormatToNumbering" config:type="boolean">false</config:config-item>
+   <config:config-item config:name="PropLineSpacingShrinksFirstLine" config:type="boolean">true</config:config-item>
+   <config:config-item config:name="SubtractFlysAnchoredAtFlys" config:type="boolean">false</config:config-item>
+   <config:config-item config:name="DisableOffPagePositioning" config:type="boolean">false</config:config-item>
+   <config:config-item config:name="ContinuousEndnotes" config:type="boolean">false</config:config-item>
+   <config:config-item config:name="ProtectBookmarks" config:type="boolean">false</config:config-item>
+   <config:config-item config:name="ProtectFields" config:type="boolean">false</config:config-item>
+   <config:config-item config:name="HyphenateURLs" config:type="boolean">false</config:config-item>
+   <config:config-item config:name="HeaderSpacingBelowLastPara" config:type="boolean">false</config:config-item>
+   <config:config-item config:name="FrameAutowidthWithMorePara" config:type="boolean">false</config:config-item>
+   <config:config-item config:name="GutterAtTop" config:type="boolean">false</config:config-item>
+   <config:config-item config:name="FootnoteInColumnToPageEnd" config:type="boolean">true</config:config-item>
+   <config:config-item config:name="ImagePreferredDPI" config:type="int">0</config:config-item>
+   <config:config-item config:name="AutoFirstLineIndentDisregardLineSpace" config:type="boolean">true</config:config-item>
+   <config:config-item config:name="JustifyLinesWithShrinking" config:type="boolean">false</config:config-item>
+   <config:config-item config:name="NoNumberingShowFollowBy" config:type="boolean">false</config:config-item>
+   <config:config-item config:name="DropCapPunctuation" config:type="boolean">true</config:config-item>
+   <config:config-item config:name="UseVariableWidthNBSP" config:type="boolean">false</config:config-item>
+   <config:config-item config:name="PrintBlackFonts" config:type="boolean">false</config:config-item>
+   <config:config-item config:name="ApplyTextAttrToEmptyLineAtEndOfParagraph" config:type="boolean">false</config:config-item>
+   <config:config-item config:name="ApplyParagraphMarkFormatToEmptyLineAtEndOfParagraph" config:type="boolean">false</config:config-item>
+   <config:config-item config:name="PaintHellOverHeaderFooter" config:type="boolean">false</config:config-item>
+   <config:config-item config:name="MinRowHeightInclBorder" config:type="boolean">false</config:config-item>
+   <config:config-item config:name="MsWordCompGridMetrics" config:type="boolean">false</config:config-item>
+   <config:config-item config:name="NoClippingWithWrapPolygon" config:type="boolean">false</config:config-item>
+   <config:config-item config:name="BalanceSpacesAndIdeographicSpaces" config:type="boolean">false</config:config-item>
+   <config:config-item config:name="ForceTopAlignmentInCellWithFloatingAnchor" config:type="boolean">false</config:config-item>
+   <config:config-item config:name="PrintAnnotationMode" config:type="short">0</config:config-item>
+   <config:config-item config:name="PrintGraphics" config:type="boolean">true</config:config-item>
+   <config:config-item config:name="PrintLeftPages" config:type="boolean">true</config:config-item>
+   <config:config-item config:name="PrintControls" config:type="boolean">true</config:config-item>
+   <config:config-item config:name="PrintPageBackground" config:type="boolean">true</config:config-item>
+   <config:config-item config:name="PrintTextPlaceholder" config:type="boolean">false</config:config-item>
+   <config:config-item config:name="PrintDrawings" config:type="boolean">true</config:config-item>
+   <config:config-item config:name="PrintHiddenText" config:type="boolean">false</config:config-item>
+   <config:config-item config:name="PrintProspect" config:type="boolean">false</config:config-item>
+   <config:config-item config:name="PrintTables" config:type="boolean">true</config:config-item>
+   <config:config-item config:name="PrintProspectRTL" config:type="boolean">false</config:config-item>
+   <config:config-item config:name="PrintReversed" config:type="boolean">false</config:config-item>
+   <config:config-item config:name="PrintRightPages" config:type="boolean">true</config:config-item>
+   <config:config-item config:name="PrintFaxName" config:type="string"/>
+   <config:config-item config:name="PrintPaperFromSetup" config:type="boolean">false</config:config-item>
+   <config:config-item config:name="PrintEmptyPages" config:type="boolean">false</config:config-item>
+  </config:config-item-set>
+ </office:settings>
+ <office:scripts>
+  <office:script script:language="ooo:Basic">
+   <ooo:libraries xmlns:ooo="http://openoffice.org/2004/office" xmlns:xlink="http://www.w3.org/1999/xlink"/>
+  </office:script>
+ </office:scripts>
+ <office:font-face-decls>
+  <style:font-face style:name="Arial" svg:font-family="Arial" style:font-family-generic="swiss"/>
+  <style:font-face style:name="Arial1" svg:font-family="Arial" style:font-family-generic="system" style:font-pitch="variable"/>
+  <style:font-face style:name="Liberation Sans" svg:font-family="&apos;Liberation Sans&apos;" style:font-family-generic="swiss" style:font-pitch="variable"/>
+  <style:font-face style:name="Liberation Serif" svg:font-family="&apos;Liberation Serif&apos;" style:font-family-generic="roman" style:font-pitch="variable"/>
+  <style:font-face style:name="Microsoft YaHei" svg:font-family="&apos;Microsoft YaHei&apos;" style:font-family-generic="system" style:font-pitch="variable"/>
+  <style:font-face style:name="NSimSun" svg:font-family="NSimSun" style:font-family-generic="system" style:font-pitch="variable"/>
+  <style:font-face style:name="Segoe Script" svg:font-family="&apos;Segoe Script&apos;" style:font-family-generic="script" style:font-pitch="variable"/>
+  <style:font-face style:name="Times New Roman" svg:font-family="&apos;Times New Roman&apos;" style:font-family-generic="roman" style:font-pitch="variable"/>
+ </office:font-face-decls>
+ <office:styles>
+  <style:default-style style:family="graphic">
+   <style:graphic-properties svg:stroke-color="#3465a4" draw:fill-color="#729fcf" fo:wrap-option="no-wrap" draw:shadow-offset-x="0.3cm" draw:shadow-offset-y="0.3cm" draw:start-line-spacing-horizontal="0.283cm" draw:start-line-spacing-vertical="0.283cm" draw:end-line-spacing-horizontal="0.283cm" draw:end-line-spacing-vertical="0.283cm" style:writing-mode="lr-tb" style:flow-with-text="false"/>
+   <style:paragraph-properties style:text-autospace="ideograph-alpha" style:line-break="strict" loext:tab-stop-distance="0cm" style:font-independent-line-spacing="false">
+    <style:tab-stops/>
+   </style:paragraph-properties>
+   <style:text-properties style:use-window-font-color="true" loext:opacity="0%" style:font-name="Liberation Serif" fo:font-size="12pt" fo:language="pt" fo:country="BR" style:letter-kerning="true" style:font-name-asian="NSimSun" style:font-size-asian="10.5pt" style:language-asian="zh" style:country-asian="CN" style:font-name-complex="Arial1" style:font-size-complex="12pt" style:language-complex="hi" style:country-complex="IN"/>
+  </style:default-style>
+  <style:default-style style:family="paragraph">
+   <style:paragraph-properties fo:orphans="2" fo:widows="2" fo:hyphenation-ladder-count="no-limit" fo:hyphenation-keep="auto" loext:hyphenation-keep-type="column" loext:hyphenation-keep-line="false" style:text-autospace="ideograph-alpha" style:punctuation-wrap="hanging" style:line-break="strict" style:tab-stop-distance="1.251cm" style:writing-mode="page"/>
+   <style:text-properties style:use-window-font-color="true" loext:opacity="0%" style:font-name="Liberation Serif" fo:font-size="12pt" fo:language="pt" fo:country="BR" style:letter-kerning="true" style:font-name-asian="NSimSun" style:font-size-asian="10.5pt" style:language-asian="zh" style:country-asian="CN" style:font-name-complex="Arial1" style:font-size-complex="12pt" style:language-complex="hi" style:country-complex="IN" fo:hyphenate="false" fo:hyphenation-remain-char-count="2" fo:hyphenation-push-char-count="2" loext:hyphenation-no-caps="false" loext:hyphenation-no-last-word="false" loext:hyphenation-word-char-count="5" loext:hyphenation-zone="no-limit"/>
+  </style:default-style>
+  <style:default-style style:family="table">
+   <style:table-properties table:border-model="collapsing"/>
+  </style:default-style>
+  <style:default-style style:family="table-row">
+   <style:table-row-properties fo:keep-together="auto"/>
+  </style:default-style>
+  <style:style style:name="Standard" style:family="paragraph" style:class="text"/>
+  <style:style style:name="Heading" style:family="paragraph" style:parent-style-name="Standard" style:next-style-name="Text_20_body" style:class="chapter">
+   <style:paragraph-properties fo:margin-top="0.423cm" fo:margin-bottom="0.212cm" style:contextual-spacing="false" fo:keep-with-next="always"/>
+   <style:text-properties style:font-name="Liberation Sans" fo:font-family="&apos;Liberation Sans&apos;" style:font-family-generic="swiss" style:font-pitch="variable" fo:font-size="14pt" style:font-name-asian="Microsoft YaHei" style:font-family-asian="&apos;Microsoft YaHei&apos;" style:font-family-generic-asian="system" style:font-pitch-asian="variable" style:font-size-asian="14pt" style:font-name-complex="Arial1" style:font-family-complex="Arial" style:font-family-generic-complex="system" style:font-pitch-complex="variable" style:font-size-complex="14pt"/>
+  </style:style>
+  <style:style style:name="Text_20_body" style:display-name="Text body" style:family="paragraph" style:parent-style-name="Standard" style:class="text">
+   <style:paragraph-properties fo:margin-top="0cm" fo:margin-bottom="0.247cm" style:contextual-spacing="false" fo:line-height="115%"/>
+  </style:style>
+  <style:style style:name="List" style:family="paragraph" style:parent-style-name="Text_20_body" style:class="list">
+   <style:text-properties style:font-size-asian="12pt" style:font-name-complex="Arial" style:font-family-complex="Arial" style:font-family-generic-complex="swiss"/>
+  </style:style>
+  <style:style style:name="Caption" style:family="paragraph" style:parent-style-name="Standard" style:class="extra">
+   <style:paragraph-properties fo:margin-top="0.212cm" fo:margin-bottom="0.212cm" style:contextual-spacing="false" text:number-lines="false" text:line-number="0"/>
+   <style:text-properties fo:font-size="12pt" fo:font-style="italic" style:font-size-asian="12pt" style:font-style-asian="italic" style:font-name-complex="Arial" style:font-family-complex="Arial" style:font-family-generic-complex="swiss" style:font-size-complex="12pt" style:font-style-complex="italic"/>
+  </style:style>
+  <style:style style:name="Index" style:family="paragraph" style:parent-style-name="Standard" style:class="index">
+   <style:paragraph-properties text:number-lines="false" text:line-number="0"/>
+   <style:text-properties style:font-size-asian="12pt" style:font-name-complex="Arial" style:font-family-complex="Arial" style:font-family-generic-complex="swiss"/>
+  </style:style>
+  <text:outline-style style:name="Outline">
+   <text:outline-level-style text:level="1" loext:num-list-format="%1%" style:num-format="">
+    <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
+     <style:list-level-label-alignment text:label-followed-by="listtab"/>
+    </style:list-level-properties>
+   </text:outline-level-style>
+   <text:outline-level-style text:level="2" loext:num-list-format="%2%" style:num-format="">
+    <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
+     <style:list-level-label-alignment text:label-followed-by="listtab"/>
+    </style:list-level-properties>
+   </text:outline-level-style>
+   <text:outline-level-style text:level="3" loext:num-list-format="%3%" style:num-format="">
+    <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
+     <style:list-level-label-alignment text:label-followed-by="listtab"/>
+    </style:list-level-properties>
+   </text:outline-level-style>
+   <text:outline-level-style text:level="4" loext:num-list-format="%4%" style:num-format="">
+    <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
+     <style:list-level-label-alignment text:label-followed-by="listtab"/>
+    </style:list-level-properties>
+   </text:outline-level-style>
+   <text:outline-level-style text:level="5" loext:num-list-format="%5%" style:num-format="">
+    <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
+     <style:list-level-label-alignment text:label-followed-by="listtab"/>
+    </style:list-level-properties>
+   </text:outline-level-style>
+   <text:outline-level-style text:level="6" loext:num-list-format="%6%" style:num-format="">
+    <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
+     <style:list-level-label-alignment text:label-followed-by="listtab"/>
+    </style:list-level-properties>
+   </text:outline-level-style>
+   <text:outline-level-style text:level="7" loext:num-list-format="%7%" style:num-format="">
+    <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
+     <style:list-level-label-alignment text:label-followed-by="listtab"/>
+    </style:list-level-properties>
+   </text:outline-level-style>
+   <text:outline-level-style text:level="8" loext:num-list-format="%8%" style:num-format="">
+    <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
+     <style:list-level-label-alignment text:label-followed-by="listtab"/>
+    </style:list-level-properties>
+   </text:outline-level-style>
+   <text:outline-level-style text:level="9" loext:num-list-format="%9%" style:num-format="">
+    <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
+     <style:list-level-label-alignment text:label-followed-by="listtab"/>
+    </style:list-level-properties>
+   </text:outline-level-style>
+   <text:outline-level-style text:level="10" loext:num-list-format="%10%" style:num-format="">
+    <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
+     <style:list-level-label-alignment text:label-followed-by="listtab"/>
+    </style:list-level-properties>
+   </text:outline-level-style>
+  </text:outline-style>
+  <text:notes-configuration text:note-class="footnote" style:num-format="1" text:start-value="0" text:footnotes-position="page" text:start-numbering-at="document"/>
+  <text:notes-configuration text:note-class="endnote" style:num-format="i" text:start-value="0"/>
+  <text:linenumbering-configuration text:number-lines="false" text:offset="0.499cm" style:num-format="1" text:number-position="left" text:increment="5"/>
+  <loext:theme loext:name="Office">
+   <loext:theme-colors loext:name="LibreOffice">
+    <loext:color loext:name="dark1" loext:color="#000000"/>
+    <loext:color loext:name="light1" loext:color="#ffffff"/>
+    <loext:color loext:name="dark2" loext:color="#000000"/>
+    <loext:color loext:name="light2" loext:color="#ffffff"/>
+    <loext:color loext:name="accent1" loext:color="#18a303"/>
+    <loext:color loext:name="accent2" loext:color="#0369a3"/>
+    <loext:color loext:name="accent3" loext:color="#a33e03"/>
+    <loext:color loext:name="accent4" loext:color="#8e03a3"/>
+    <loext:color loext:name="accent5" loext:color="#c99c00"/>
+    <loext:color loext:name="accent6" loext:color="#c9211e"/>
+    <loext:color loext:name="hyperlink" loext:color="#0000ee"/>
+    <loext:color loext:name="followed-hyperlink" loext:color="#551a8b"/>
+   </loext:theme-colors>
+  </loext:theme>
+ </office:styles>
+ <office:automatic-styles>
+  <style:style style:name="P1" style:family="paragraph" style:parent-style-name="Standard">
+   <style:paragraph-properties fo:line-height="200%" fo:text-align="end" style:justify-single-word="false"/>
+   <style:text-properties style:font-name="Times New Roman" fo:font-size="14pt" officeooo:paragraph-rsid="0012e2e7" style:font-size-asian="14pt" style:font-size-complex="14pt"/>
+  </style:style>
+  <style:style style:name="P2" style:family="paragraph" style:parent-style-name="Standard">
+   <style:paragraph-properties fo:line-height="200%"/>
+   <style:text-properties style:font-name="Times New Roman" fo:font-size="14pt" officeooo:paragraph-rsid="0012e2e7" style:font-size-asian="14pt" style:font-size-complex="14pt"/>
+  </style:style>
+  <style:style style:name="P3" style:family="paragraph" style:parent-style-name="Standard">
+   <style:paragraph-properties fo:line-height="200%" fo:text-align="justify" style:justify-single-word="false"/>
+   <style:text-properties style:font-name="Times New Roman" fo:font-size="14pt" officeooo:rsid="0012e2e7" officeooo:paragraph-rsid="0012e2e7" style:font-size-asian="14pt" style:font-size-complex="14pt"/>
+  </style:style>
+  <style:style style:name="P4" style:family="paragraph" style:parent-style-name="Standard">
+   <style:paragraph-properties fo:line-height="200%"/>
+   <style:text-properties style:font-name="Times New Roman" fo:font-size="14pt" officeooo:rsid="0012e2e7" officeooo:paragraph-rsid="0012e2e7" style:font-size-asian="14pt" style:font-size-complex="14pt"/>
+  </style:style>
+  <style:style style:name="P5" style:family="paragraph" style:parent-style-name="Standard">
+   <style:paragraph-properties fo:line-height="200%"/>
+   <style:text-properties style:font-name="Times New Roman" fo:font-size="14pt" officeooo:rsid="001406c2" officeooo:paragraph-rsid="001406c2" style:font-size-asian="14pt" style:font-size-complex="14pt"/>
+  </style:style>
+  <style:style style:name="P6" style:family="paragraph" style:parent-style-name="Standard">
+   <style:paragraph-properties fo:line-height="200%"/>
+   <style:text-properties style:font-name="Segoe Script" fo:font-size="14pt" officeooo:rsid="001d3732" officeooo:paragraph-rsid="001406c2" style:font-size-asian="14pt" style:font-size-complex="14pt"/>
+  </style:style>
+  <style:style style:name="P7" style:family="paragraph" style:parent-style-name="Standard">
+   <style:paragraph-properties fo:line-height="200%" fo:text-align="end" style:justify-single-word="false"/>
+   <style:text-properties style:font-name="Times New Roman" fo:font-size="14pt" officeooo:rsid="001406c2" officeooo:paragraph-rsid="001406c2" style:font-size-asian="14pt" style:font-size-complex="14pt"/>
+  </style:style>
+  <style:style style:name="T1" style:family="text">
+   <style:text-properties officeooo:rsid="001406c2"/>
+  </style:style>
+  <style:style style:name="T2" style:family="text">
+   <style:text-properties officeooo:rsid="0021d9ab"/>
+  </style:style>
+  <style:style style:name="T3" style:family="text">
+   <style:text-properties style:text-line-through-style="none" style:text-line-through-type="none" style:text-underline-style="none" fo:font-weight="bold" officeooo:rsid="001d3732" style:font-weight-asian="bold" style:font-weight-complex="bold"/>
+  </style:style>
+  <style:style style:name="T4" style:family="text">
+   <style:text-properties style:text-underline-style="none" fo:font-weight="bold" officeooo:rsid="0021d9ab" style:font-weight-asian="bold" style:font-weight-complex="bold"/>
+  </style:style>
+  <style:style style:name="T5" style:family="text">
+   <style:text-properties style:text-underline-style="none" fo:font-weight="bold" officeooo:rsid="001d3732" style:font-weight-asian="bold" style:font-weight-complex="bold"/>
+  </style:style>
+  <style:style style:name="T6" style:family="text">
+   <style:text-properties style:text-underline-style="none" fo:font-weight="bold" officeooo:rsid="00239b81" style:font-weight-asian="bold" style:font-weight-complex="bold"/>
+  </style:style>
+  <style:style style:name="T7" style:family="text">
+   <style:text-properties officeooo:rsid="0015363f"/>
+  </style:style>
+  <style:style style:name="T8" style:family="text">
+   <style:text-properties style:text-underline-style="none" fo:font-weight="bold" officeooo:rsid="0015363f" style:font-weight-asian="bold" style:font-weight-complex="bold"/>
+  </style:style>
+  <style:style style:name="T9" style:family="text">
+   <style:text-properties officeooo:rsid="001bcba3"/>
+  </style:style>
+  <style:style style:name="T10" style:family="text">
+   <style:text-properties fo:font-weight="bold" officeooo:rsid="001d3732" style:font-weight-asian="bold" style:font-weight-complex="bold"/>
+  </style:style>
+  <style:style style:name="T11" style:family="text">
+   <style:text-properties officeooo:rsid="001d3732"/>
+  </style:style>
+  <style:page-layout style:name="pm1">
+   <style:page-layout-properties fo:page-width="21.001cm" fo:page-height="29.7cm" style:num-format="1" style:print-orientation="portrait" fo:margin-top="2cm" fo:margin-bottom="2cm" fo:margin-left="2cm" fo:margin-right="2cm" style:writing-mode="lr-tb" style:layout-grid-color="#c0c0c0" style:layout-grid-lines="20" style:layout-grid-base-height="0.706cm" style:layout-grid-ruby-height="0.353cm" style:layout-grid-mode="none" style:layout-grid-ruby-below="false" style:layout-grid-print="false" style:layout-grid-display="false" style:footnote-max-height="0cm" loext:margin-gutter="0cm">
+    <style:footnote-sep style:width="0.018cm" style:distance-before-sep="0.101cm" style:distance-after-sep="0.101cm" style:line-style="solid" style:adjustment="left" style:rel-width="25%" style:color="#000000"/>
+   </style:page-layout-properties>
+   <style:header-style/>
+   <style:footer-style/>
+  </style:page-layout>
+  <style:style style:name="dp1" style:family="drawing-page">
+   <style:drawing-page-properties draw:background-size="full"/>
+  </style:style>
+ </office:automatic-styles>
+ <office:master-styles>
+  <style:master-page style:name="Standard" style:page-layout-name="pm1" draw:style-name="dp1"/>
+ </office:master-styles>
+ <office:body>
+  <office:text>
+   <text:sequence-decls>
+    <text:sequence-decl text:display-outline-level="0" text:name="Illustration"/>
+    <text:sequence-decl text:display-outline-level="0" text:name="Table"/>
+    <text:sequence-decl text:display-outline-level="0" text:name="Text"/>
+    <text:sequence-decl text:display-outline-level="0" text:name="Drawing"/>
+    <text:sequence-decl text:display-outline-level="0" text:name="Figure"/>
+   </text:sequence-decls>
+   <text:p text:style-name="P1">Contribuição Assistencial / Contribuição <text:span text:style-name="T1">S</text:span>indical</text:p>
+   <text:p text:style-name="P2"/>
+   <text:p text:style-name="P2"/>
+   <text:p text:style-name="P2">Ao sindicato <text:span text:style-name="T2">#SINDICATO#</text:span>,</text:p>
+   <text:p text:style-name="P2"/>
+   <text:p text:style-name="P3">Eu, <text:span text:style-name="T3">#NOME_COMPLETO#</text:span>, portador da <text:span text:style-name="T1">C</text:span>arteira <text:span text:style-name="T1">P</text:span>rofissional Nº <text:span text:style-name="T4">#CARTEIRA_PROFISSIONAL#</text:span><text:span text:style-name="T1">, regularmente registrado na empresa </text:span><text:span text:style-name="T4">#NOME_DA_EMPRESA#</text:span><text:span text:style-name="T1">, CNPJ Nº </text:span><text:span text:style-name="T5">#CNPJ#</text:span><text:span text:style-name="T1">, com sede à </text:span><text:span text:style-name="T6">#ENDERECO#</text:span><text:span text:style-name="T1">, </text:span><text:span text:style-name="T7">bairro </text:span><text:span text:style-name="T5">#BAIRRO#</text:span><text:span text:style-name="T8"> </text:span><text:span text:style-name="T9">na cidade de </text:span><text:span text:style-name="T5">#CIDADE#</text:span><text:span text:style-name="T1">-</text:span><text:span text:style-name="T10">#ESTADO#</text:span><text:span text:style-name="T1">, não sindicalizado, manifesto oposição ao desconto em Folha de Pagamento a título de contribuição assistencial, sindical ou outras contribuições em favor dessa entidade.</text:span></text:p>
+   <text:p text:style-name="P4"/>
+   <text:p text:style-name="P4"/>
+   <text:p text:style-name="P5">Atenciosamente,</text:p>
+   <text:p text:style-name="P6">#NOME_COMPLETO#</text:p>
+   <text:p text:style-name="P5"/>
+   <text:p text:style-name="P5"/>
+   <text:p text:style-name="P5"/>
+   <text:p text:style-name="P7"><text:span text:style-name="T11">#CIDADE_DE_ENVIO#</text:span>, <text:span text:style-name="T11">#DATA_DE_ENVIO#</text:span>.</text:p>
+  </office:text>
+ </office:body>
+</office:document>`;
+
+      // ---------- DOM Elements ----------
+      const sidenav = document.getElementById('sidenav');
+      const overlay = document.getElementById('sidenavOverlay');
+      const menuToggle = document.getElementById('menuToggleBtn');
+      const closeSidenavBtn = document.getElementById('closeSidenavBtn');
+      const themeToggle = document.getElementById('themeToggleBtn');
+      const themeIcon = document.getElementById('themeIcon');
+      const homeView = document.getElementById('homeView');
+      const formView = document.getElementById('formView');
+      const navItems = document.querySelectorAll('.nav-item');
+      
+      // Form fields
+      const sindicatoInput = document.getElementById('sindicato');
+      const nomeCompletoInput = document.getElementById('nomeCompleto');
+      const carteiraProfissionalInput = document.getElementById('carteiraProfissional');
+      const nomeEmpresaInput = document.getElementById('nomeEmpresa');
+      const cnpjInput = document.getElementById('cnpj');
+      const enderecoInput = document.getElementById('endereco');
+      const bairroInput = document.getElementById('bairro');
+      const cidadeInput = document.getElementById('cidade');
+      const estadoInput = document.getElementById('estado');
+      const cidadeEnvioInput = document.getElementById('cidadeEnvio');
+      const dataEnvioInput = document.getElementById('dataEnvio');
+
+      // Set default date to today
+      const today = new Date();
+      const yyyy = today.getFullYear();
+      const mm = String(today.getMonth() + 1).padStart(2, '0');
+      const dd = String(today.getDate()).padStart(2, '0');
+      dataEnvioInput.value = `${yyyy}-${mm}-${dd}`;
+
+      // ---------- Helper: escape XML ----------
+      function escapeXml(unsafe) {
+        if (!unsafe) return '';
+        return unsafe.replace(/[<>&'"]/g, function (c) {
+          switch (c) {
+            case '<': return '&lt;';
+            case '>': return '&gt;';
+            case '&': return '&amp;';
+            case '\'': return '&apos;';
+            case '"': return '&quot;';
+            default: return c;
+          }
+        });
+      }
+
+      // Format date: "28 de fevereiro de 2024"
+      function formatDateToLong(dateString) {
+        if (!dateString) return '';
+        const [year, month, day] = dateString.split('-');
+        const date = new Date(year, month - 1, day);
+        return date.toLocaleDateString('pt-BR', { day: 'numeric', month: 'long', year: 'numeric' });
+      }
+
+      // Replace placeholders
+      function generateFilledXml(formData) {
+        let xml = templateXml;
+        const replacements = {
+          '#SINDICATO#': escapeXml(formData.sindicato),
+          '#NOME_COMPLETO#': escapeXml(formData.nomeCompleto),
+          '#CARTEIRA_PROFISSIONAL#': escapeXml(formData.carteiraProfissional),
+          '#NOME_DA_EMPRESA#': escapeXml(formData.nomeEmpresa),
+          '#CNPJ#': escapeXml(formData.cnpj),
+          '#ENDERECO#': escapeXml(formData.endereco),
+          '#BAIRRO#': escapeXml(formData.bairro),
+          '#CIDADE#': escapeXml(formData.cidade),
+          '#ESTADO#': escapeXml(formData.estado),
+          '#CIDADE_DE_ENVIO#': escapeXml(formData.cidadeEnvio),
+          '#DATA_DE_ENVIO#': escapeXml(formData.dataEnvio) // formatted below
+        };
+        // Special: format date
+        const formattedDate = formatDateToLong(formData.dataEnvio);
+        replacements['#DATA_DE_ENVIO#'] = escapeXml(formattedDate);
+
+        for (const [placeholder, value] of Object.entries(replacements)) {
+          // Replace all occurrences
+          xml = xml.split(placeholder).join(value);
+        }
+        return xml;
+      }
+
+      // Validate and generate PDF
+      function handleGeneratePdf() {
+        // Check required fields
+        const fields = [
+          sindicatoInput, nomeCompletoInput, carteiraProfissionalInput, nomeEmpresaInput,
+          cnpjInput, enderecoInput, bairroInput, cidadeInput, estadoInput, cidadeEnvioInput, dataEnvioInput
+        ];
+        for (let field of fields) {
+          if (!field.value.trim()) {
+            alert('Por favor, preencha todos os campos obrigatórios.');
+            field.focus();
+            return;
+          }
+        }
+
+        const formData = {
+          sindicato: sindicatoInput.value.trim(),
+          nomeCompleto: nomeCompletoInput.value.trim(),
+          carteiraProfissional: carteiraProfissionalInput.value.trim(),
+          nomeEmpresa: nomeEmpresaInput.value.trim(),
+          cnpj: cnpjInput.value.trim(),
+          endereco: enderecoInput.value.trim(),
+          bairro: bairroInput.value.trim(),
+          cidade: cidadeInput.value.trim(),
+          estado: estadoInput.value.trim(),
+          cidadeEnvio: cidadeEnvioInput.value.trim(),
+          dataEnvio: dataEnvioInput.value
+        };
+
+        const filledXml = generateFilledXml(formData);
+        const blob = new Blob([filledXml], { type: 'application/xml' });
+        const file = new File([blob], 'carta_oposicao.xml', { type: 'application/xml' });
+
+        // Create hidden form to submit (avoid CORS)
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = 'https://libreoffice-to-pdf.vercel.app/api/upload';
+        form.enctype = 'multipart/form-data';
+        form.target = '_blank';
+
+        // Create file input
+        const fileInput = document.createElement('input');
+        fileInput.type = 'file';
+        fileInput.name = 'file';
+        fileInput.style.display = 'none';
+        
+        // Append to form
+        form.appendChild(fileInput);
+        document.body.appendChild(form);
+
+        // Set file using DataTransfer (works in modern browsers)
+        const dt = new DataTransfer();
+        dt.items.add(file);
+        fileInput.files = dt.files;
+
+        form.submit();
+        
+        // Cleanup after a short delay
+        setTimeout(() => {
+          document.body.removeChild(form);
+        }, 100);
+      }
+
+      // ---------- UI State ----------
+      function openSidenav() {
+        sidenav.classList.add('open');
+        overlay.classList.add('visible');
+      }
+      function closeSidenav() {
+        sidenav.classList.remove('open');
+        overlay.classList.remove('visible');
+      }
+      function setActivePage(pageId) {
+        // Update views
+        homeView.classList.toggle('active', pageId === 'home');
+        formView.classList.toggle('active', pageId === 'form');
+        // Update nav active state
+        navItems.forEach(item => {
+          const page = item.dataset.page;
+          item.classList.toggle('active', page === pageId);
+        });
+        // Close sidenav on mobile after navigation
+        if (window.innerWidth < 1024) {
+          closeSidenav();
+        }
+      }
+
+      // Theme toggle
+      function toggleDarkMode() {
+        document.body.classList.toggle('dark');
+        const isDark = document.body.classList.contains('dark');
+        themeIcon.textContent = isDark ? 'light_mode' : 'dark_mode';
+        localStorage.setItem('theme', isDark ? 'dark' : 'light');
+      }
+      function initTheme() {
+        const saved = localStorage.getItem('theme');
+        if (saved === 'dark') {
+          document.body.classList.add('dark');
+          themeIcon.textContent = 'light_mode';
+        } else {
+          document.body.classList.remove('dark');
+          themeIcon.textContent = 'dark_mode';
+        }
+      }
+
+      // ---------- Event Listeners ----------
+      menuToggle.addEventListener('click', openSidenav);
+      overlay.addEventListener('click', closeSidenav);
+      closeSidenavBtn?.addEventListener('click', closeSidenav);
+      
+      navItems.forEach(item => {
+        item.addEventListener('click', (e) => {
+          const page = item.dataset.page;
+          setActivePage(page);
+        });
+      });
+
+      themeToggle.addEventListener('click', toggleDarkMode);
+
+      document.getElementById('generatePdfBtn').addEventListener('click', handleGeneratePdf);
+
+      // Close sidenav on escape key
+      window.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && sidenav.classList.contains('open')) {
+          closeSidenav();
+        }
+      });
+
+      // Responsive: auto close on window resize if desktop
+      window.addEventListener('resize', () => {
+        if (window.innerWidth >= 1024) {
+          closeSidenav();
+        }
+      });
+
+      // Initialize theme and default page
+      initTheme();
+      setActivePage('home');
+      
+      // For better UX: if on mobile and user clicks nav, we already close.
+    })();
+  </script>
+</body>
+</html>
